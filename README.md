@@ -141,6 +141,3 @@ The application uses PostgreSQL with the following main entities:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👥 Contact
-
-For questions or support, please contact [your-email@example.com](mailto:your-email@example.com).
