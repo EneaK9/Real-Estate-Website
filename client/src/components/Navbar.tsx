@@ -52,15 +52,15 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <Image
                 src="/logo.svg"
-                alt="Rentiful Logo"
+                alt="NESTORIA Logo"
                 width={24}
                 height={24}
                 className="w-6 h-6"
               />
               <div className="text-xl font-bold">
-                RENT
+                NEST
                 <span className="text-secondary-500 font-light hover:!text-primary-300">
-                  IFUL
+                  ORIA
                 </span>
               </div>
             </div>
