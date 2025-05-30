@@ -6,7 +6,10 @@ import {
 } from "../controllers/propertyControllers";
 import multer from "multer";
 import { authMiddleware } from "../middleware/authMiddleware";
+import { PrismaClient } from "@prisma/client";
+import { Request, Response } from "express";
 
+const prisma = new PrismaClient();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -92,6 +95,69 @@ router.get("/", getProperties);
  *         description: The property was not found
  */
 router.get("/:id", getProperty);
+
+/**
+ * @swagger
+ * /properties/{id}/leases:
+ *   get:
+ *     summary: Get leases for a specific property
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The property ID
+ *     responses:
+ *       200:
+ *         description: List of leases for the property
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Lease'
+ *       404:
+ *         description: Property not found
+ */
+router.get(
+	"/:id/leases",
+	authMiddleware(["manager", "tenant"]),
+	async (req: Request, res: Response): Promise<void> => {
+		try {
+			const propertyId = parseInt(req.params.id);
+
+			// Check if property exists
+			const property = await prisma.property.findUnique({
+				where: { id: propertyId },
+			});
+
+			if (!property) {
+				res.status(404).json({ message: "Property not found" });
+				return;
+			}
+
+			// Get leases for this property
+			const leases = await prisma.lease.findMany({
+				where: { propertyId },
+				include: {
+					tenant: true,
+					property: true,
+					payments: true,
+				},
+			});
+
+			res.json(leases);
+		} catch (error: any) {
+			console.error("Error fetching property leases:", error);
+			res.status(500).json({
+				message: `Failed to fetch property leases: ${error.message}`,
+				stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+			});
+		}
+	}
+);
 
 /**
  * @swagger
